@@ -44,6 +44,7 @@ local function FindSizeHandler( ent )
 
 end
 
+local advresizer_vertexlimit = CreateConVar( "advresizer_convexvertexlimit", "500", FCVAR_ARCHIVE + FCVAR_NOTIFY, "Impose vertex limit to prevent lag.")
 local function ResizePhysics( ent, scale )
 
 	ent:PhysicsInit( SOLID_VPHYSICS )
@@ -57,6 +58,8 @@ local function ResizePhysics( ent, scale )
 	if ( not istable( physmesh ) ) or ( #physmesh < 1 ) then return false end
 
 	for convexkey, convex in pairs( physmesh ) do
+
+		if #convex > advresizer_vertexlimit:GetInt() then return false end
 
 		for poskey, postab in pairs( convex ) do
 
@@ -778,13 +781,13 @@ if ( SERVER ) then
 
 	end
 
-	local advresizer_clamp =	CreateConVar( "advresizer_clamp",	"0",	FCVAR_ARCHIVE + FCVAR_NOTIFY,	"Force the Prop Resizer to clamp its values." )
+	local advresizer_clamp =	CreateConVar( "advresizer_clamp",	"1",	FCVAR_ARCHIVE + FCVAR_NOTIFY,	"Force the Prop Resizer to clamp its values." )
 
-	local function ClampVal( scale )
+	local function ClampVal( obb, scale )
 
-		scale.x = math.Clamp( scale.x, 0.1, 10 )
-		scale.y = math.Clamp( scale.y, 0.1, 10 )
-		scale.z = math.Clamp( scale.z, 0.1, 10 )
+		scale.x = math.Clamp( obb.x*scale.x, 0.1, 5000 ) / obb.x
+		scale.y = math.Clamp( obb.y*scale.y, 0.1, 5000 ) / obb.y
+		scale.z = math.Clamp( obb.z*scale.z, 0.1, 5000 ) / obb.z
 
 	end
 
@@ -794,16 +797,18 @@ if ( SERVER ) then
 
 		if ( not IsValidEntity( ent ) ) then return false end
 
-		if ( ent:IsRagdoll() ) then return false end
+		if ( ent:GetClass() ~= "prop_physics" ) then return false end
 
 		local pscale = Vector( self:GetClientNumber( "sx" ), self:GetClientNumber( "sy" ), self:GetClientNumber( "sz" ) )
 		local vscale = pscale
+		local obb = ent.ResizerOriginalOBB
+		if not obb then obb = ent:OBBMaxs() - ent:OBBMins(); ent.ResizerOriginalOBB = obb end
 
 		if ( self:GetClientBool( "smwo" ) ) then
 
 			if ( advresizer_clamp:GetBool() ) then
 
-				ClampVal( pscale )
+				ClampVal( obb, pscale )
 
 			end
 
@@ -813,8 +818,8 @@ if ( SERVER ) then
 
 			if ( advresizer_clamp:GetBool() ) then
 
-				ClampVal( pscale )
-				ClampVal( vscale )
+				ClampVal( obb, pscale )
+				ClampVal( obb, vscale )
 
 			end
 
