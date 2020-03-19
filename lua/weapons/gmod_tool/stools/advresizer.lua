@@ -124,7 +124,7 @@ if ( SERVER ) then
 			for k, Constraint in pairs( Constraints ) do
 
 				if ( Constraint ~= RConstraint ) then
-	
+
 					table.insert( NewTab, Constraint )
 
 				end
@@ -891,6 +891,8 @@ if ( SERVER ) then
 		if ( WAS_RESIZED ) then SIZEHANDLER:Remove() end
 
 		duplicator.ClearEntityModifier( ent, "advr" )
+
+		ent.ResizerOriginalOBB = nil
 
 		return true
 
