@@ -1,4 +1,9 @@
 
+-- Put any models who crash the server, or shouldn't scale physics here.
+local badPhysicsModels = {
+	["models/props_manor/fireplace_logs.mdl"] = true,
+}
+
 TOOL.Category = "Construction"
 TOOL.Name = "#tool.advresizer.name"
 
@@ -823,6 +828,11 @@ if ( SERVER ) then
 
 			end
 
+		end
+
+		-- If it's a bad physics model, we simply just let the scale be at 1
+		if badPhysicsModels[ent:GetModel()] then
+			pscale = Vector(1, 1, 1)
 		end
 
 		SIZEHANDLER = FindSizeHandler( ent )
