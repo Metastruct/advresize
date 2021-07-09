@@ -645,6 +645,7 @@ if ( SERVER ) then
 				StorePhysicsData( physobj )
 
 				local success = ResizePhysics( ent, scale )
+				if not success then self:GetOwner():ChatPrint("Prop Resizer: Can not scale physics, too complex!") end
 
 				if ( self:GetClientBool( "dcp" ) ) then
 
@@ -833,6 +834,7 @@ if ( SERVER ) then
 		-- If it's a bad physics model, we simply just let the scale be at 1
 		if badPhysicsModels[ent:GetModel()] then
 			pscale = Vector(1, 1, 1)
+			self:GetOwner():ChatPrint("Prop Resizer: Can not scale physics, bad model!")
 		end
 
 		SIZEHANDLER = FindSizeHandler( ent )
